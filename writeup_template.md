@@ -22,7 +22,7 @@
 [image1a]: ./output/grid.PNG
 [image1b]: ./output/warpedGrid.PNG
 [image2a]: ./output/navigableExtract.PNG
-[image2b]: ./output/obstacleExtract.PNG
+[image2b]: ./output/ObstacleExtract.PNG
 [image3]: ./output/resultMapping.PNG
 [video1]: ./output/test_mapping.MP4
 
