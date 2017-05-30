@@ -19,7 +19,7 @@
 
 [//]: # "Image References"
 
-[image1a]: ./output/grid.png
+[image1a]: ./output/grid.PNG
 [image1b]: ./output/warpedGrid.png
 [image2a]: ./output/navigableExtract.png
 [image2b]: ./output/obstacleExtract.png
