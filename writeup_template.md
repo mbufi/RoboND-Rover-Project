@@ -167,8 +167,7 @@ ypix_translated = np.int_(ypos + (ypix_rot / scale))
 Note: Scale is a factor of 10 between world space pixels and rover space pixels in this case.
 
 ##### The Resulting Process
-
-Below are 4 images showing the process. Upper left is a camera image. Upper right is a perspective transform. Bottom left is a combined thresholded image. Here the blue part is the navigable ground and the red part are the obstacles. Bottom right is a coordinate transform with the arrow indicating direction of travel of the robot.
+Once we calculate pixel values in rover-centric coords and distance/angle to all pixels, apply rotation and tranlation we are provided with the following 4 images below. Upper left is a camera image. Upper right is a perspective transform. Bottom left is a combined thresholded image. The blue area is the navigable ground and the red part are the obstacles. Bottom right is a coordinate transform with and arrow indicating direction of travel of the robot.
 
 ![alt text][image3]
 
