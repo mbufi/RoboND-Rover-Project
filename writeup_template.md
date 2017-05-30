@@ -176,30 +176,92 @@ Once we calculate pixel values in rover-centric coords and distance/angle to all
 
 ##### 1. Define source and destination points for perspective transform
 
-The same transform is used as above.
+```python
+dst_size = 5 
+    bottom_offset = 6
+    source = np.float32([[14, 140], [301 ,140],[200, 96], [118, 96]])
+    destination = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_offset],
+                      [image.shape[1]/2 + dst_size, image.shape[0] - bottom_offset],
+                      [image.shape[1]/2 + dst_size, image.shape[0] - 2*dst_size - bottom_offset], 
+                      [image.shape[1]/2 - dst_size, image.shape[0] - 2*dst_size - bottom_offset],
+                      ])
+```
 
 ##### 2. Apply perspective transform
+```python 
+warped = perspect_transform(img, source, destination)
+```
 
 ##### 3. Apply color threshold to identify navigable terrain/obstacles/rock samples
 
-The color thresholds are applied to find the Obstacles, (Yellow) Rocks and (Navigable) Ground. The results are coordinates corresponding to the 3 categories.
+```python
+navigable = navigate_thresh(warped) #navigable terrain color-thresholded binary image
+obstacles = obstacle_thresh(warped) # obstacle color-thresholded binary image
+samples = sample_thresh(warped) #sample color-thresholded binary image
+```
 
 ##### 4. Convert thresholded image pixel values to rover-centric coords
 
-The coordinates found above are transformed to the rover frame of reference using `rover_coords()`.
+```python
+x_ObsPixel, y_ObsPixel  = rover_coords(obstacles)
+x_SamplePixel, y_SamplePixel  = rover_coords(samples)
+x_NavPixel, y_NavPixel  = rover_coords(navigable)
+```
 
 ##### 5. Convert rover-centric pixel values to world coords
 
 The coordinates in the rover frame of reference are now converted to world frame of reference using `pix_to_world()`.
+```python
+scale = 10 # 0.1 to 1
+world_size = data.worldmap.shape[0]
+    
+obstacle_x_world, obstacle_y_world = pix_to_world(x_ObsPixel, y_ObsPixel, data.xpos[data.count], data.ypos[data.count], 
+                                    data.yaw[data.count], world_size, scale)
+sample_x_world, sample_y_world = pix_to_world(x_SamplePixel, y_SamplePixel,data.xpos[data.count], data.ypos[data.count], 
+                                     data.yaw[data.count], world_size, scale)
+nav_x_world, nav_y_world = pix_to_world(x_NavPixel, y_NavPixel, data.xpos[data.count], data.ypos[data.count], 
+                                     data.yaw[data.count], world_size, scale)
+```
 
 ##### 6. Update worldmap (to be displayed on right side of screen)
 
-If the robot's roll or pitch are below a certain value - meaning when the robot is on a flat surface - then the obstacles, the yellow rocks and the navigable ground are added to the world map. In this case the value is set to `0.5`.
+Optimizing Map Fidelity is an interesting proces.: The perspective transform is technically only valid when `roll` and `pitch angles` are near zero. If the Rovwer is slamming on the brakes or turning hard, both the `pitch` and `roll` can depart significantly from zero, and the transformed image will no longer be a valid map. It will be skewed and the resulting fidelity of what the Rover "maps" vs. the "real world" map with not coincide. Therefore, setting thresholds near zero in roll and pitch to determine which transformed images are valid for mapping before actually mapping them results in much better fidelity.
+```python
+#we do not want to update map if the pitch and roll are too great else our prespective
+#step wont be accurate
+MAXPITCH = .4 #from basepoint 0
+MAXROLL = .4 # from basepoint 0
+
+#get the minimum of both 
+pitch = min(abs(data.pitch[data.count]), abs(data.pitch[data.count] -360))
+roll = min(abs(data.roll[data.count]), abs(data.roll[data.count]))
+if(abs(pitch) < MAXPITCH and abs(roll) < MAXROLL):
+    data.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
+    data.worldmap[sample_y_world, sample_x_world, 1] += 1
+    data.worldmap[nav_y_world, nav_x_world, 2] += 1
+```
+
 
 ##### 7. Make a mosaic image
 
 Creating a composite image for the video.
+```python
+# First create a blank image (can be whatever shape you like)
+output_image = np.zeros((img.shape[0] + data.worldmap.shape[0], img.shape[1]*2, 3))
+    # Next you can populate regions of the image with various output
+    # Here I'm putting the original image in the upper left hand corner
+output_image[0:img.shape[0], 0:img.shape[1]] = img
 
+    # Let's create more images to add to the mosaic, first a warped image
+warped = perspect_transform(img, source, destination)
+    # Add the warped image in the upper right hand corner
+output_image[0:img.shape[0], img.shape[1]:] = warped
+
+    # Overlay worldmap with ground truth map
+map_add = cv2.addWeighted(data.worldmap, 1, data.ground_truth, 0.5, 0)
+    # Flip map overlay so y-axis points upward and add to output_image 
+output_image[img.shape[0]:, 0:data.worldmap.shape[1]] = np.flipud(map_add)
+```
 
 
 ![alt text][video1]
