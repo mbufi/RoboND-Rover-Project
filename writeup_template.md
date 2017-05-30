@@ -20,10 +20,10 @@
 [//]: # "Image References"
 
 [image1a]: ./output/grid.png
-[image1b]: ./output/warped_grid.png
-[image2a]: ./output/ground_extract.png
-[image2b]: ./output/obstacle_extract.png
-[image3]: ./output/result.png
+[image1b]: ./output/warpedGrid.png
+[image2a]: ./output/navigableExtract.png
+[image2b]: ./output/obstacleExtract.png
+[image3]: ./output/resultMapping.png
 [video1]: ./output/test_mapping.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
