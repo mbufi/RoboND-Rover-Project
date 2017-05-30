@@ -25,7 +25,8 @@
 [image2b]: ./output/ObstacleExtract.PNG
 [image3]: ./output/resultMapping.PNG
 [image4a]: ./output/MaptoWorld.PNG
-[image4b]: ./output/rotAndTranslation.PNG
+[image4b]: ./output/rotationAndTranslation.PNG
+[image4c]: ./output/rotationMatrix.PNG
 [video1]: ./output/test_mapping.MP4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
@@ -137,21 +138,30 @@ The environment you will be navigating with the rover in this project is roughly
 
 ###### Rotation and Translation
 ![alt text][image4b]
-The functions `rotate_pix()` and `translate_pix()` are completed respectively as follows:
+For rotation, you accomplish this by applying a rotation matrix to the rover space pixel values (xpixel,ypixel). For a roation through an angle θ, use the following:
+![alt text][image4c]
+
+The functions `rotate_pix()`is implemented as so: 
 
 ```python
 # Convert yaw to radians
-yaw_rad = yaw * np.pi / 180
 # Apply a rotation
+yaw_rad = yaw * np.pi / 180
 xpix_rotated = xpix * np.cos(yaw_rad) - ypix * np.sin(yaw_rad)
 ypix_rotated = xpix * np.sin(yaw_rad) + ypix * np.sin(yaw_rad)
+# Return the result  
 ```
 
+The next step in mapping to world coordinates is to perform a translation by simply adding the x and y components of the rover's position to the x_rotated and y_rotated values calculated above.
+
+`translate_pix()` is implemented as so:
 ```python
 # Apply a scaling and a translation
 xpix_translated = np.int_(xpos + (xpix_rot / scale))
 ypix_translated = np.int_(ypos + (ypix_rot / scale))
+# Return the result  
 ```
+Note: Scale is a factor of 10 between world space pixels and rover space pixels in this case.
 
 ##### The Resulting Process
 
