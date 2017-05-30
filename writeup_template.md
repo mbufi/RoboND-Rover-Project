@@ -262,21 +262,40 @@ map_add = cv2.addWeighted(data.worldmap, 1, data.ground_truth, 0.5, 0)
     # Flip map overlay so y-axis points upward and add to output_image 
 output_image[img.shape[0]:, 0:data.worldmap.shape[1]] = np.flipud(map_add)
 ```
-
+##### A quick nagivation and mapping video using the functionality from the above code.
 
 ![alt text][video1]
 
-### Autonomous Navigation and Mapping
+### Autonomous Navigation and Mapping : NASA Rover Challenge
+
+#### Requirements for a Passing Project Submission
+The requirement for a passing submission is to map at least 40% of the environment at 60% fidelity and locate at least one of the rock samples. Each time you launch the simulator in autonomous mode there will be 6 rock samples scattered randomly about the environment and your rover will start at random orientation in the middle of the map.
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
+Much of the explaination on how these steps were coded is provided above. 
+
+Something to Note:
+The most important aspect was Optimizing Map Fidelity for the first run. Never did it meet the fidelity specifications until I included the max pitch/roll calculations. Without these, the fidelity was usually around 40%. Not a good accuracy! 
+
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
+
+IMAGE OF RESULT
+
+
+To improve the results, most of the enhancements would be towards `decision.py`:
+* Give the robot more brains as to increasing speeds in straight aways for longer periods without swaying
+* Stop from re-visting areas
+* Making the Rover a wall crawler (since most samples are near the walls). If I made it always hug the RIGHT wall, it would never revist the same area until it reached 100% completion
+* Implementing the grabbing mechanism. It worked in my test scripts, but the simulator used too much memory, and caused various issues with lag and freezing during the process of grabbing samples.
+* Implementing start/end position coordinates. So once the Rover has mapped and grabbed all the samples, it would return to its starting coordinates using a somewhat complex planned navigation routine.  
+
+
 
 **Note: running the simulator with different choices of resolution and graphics quality may produce different results, particularly on different machines! Make a note of your simulator settings (resolution and graphics quality set on launch) and frames per second (FPS output to terminal by drive_rover.py) in your writeup when you submit the project so your reviewer can reproduce your results.**
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
-
-
-![alt text][image3]
+`FPS: 50`
+`SIMULATOR SETTINGS: 1024x768, GRAPHICS = GOOD`
 
