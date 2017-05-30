@@ -72,14 +72,58 @@ Below is an example of a camera image with grid added (to the left) and this sam
 
 ##### Color Thresholding
 
-A new function is created called `color_threshold()`.  It takes lower and upper thresholds. The function requires that each pixel in the input image be above all three lower threshold values in RGB and below the three  upper threshold values in RGB.
+Once the prespective transform has been applied, the next step is to create 3 new functions called `def navigate_thresh(img, rgb_thresh=(160, 160, 160)):`, `def obstacle_thresh(img,rgb_thresh=(160,160,160)):`, and `def sample_thresh(img, low_yellow_thresh=(100, 100, 0), hi_yellow_thresh=(210, 210, 55)):`. These 3 are used to extract the features out of the incoming camera input from the Rover, and segement them into binary images looking for specific thresholds. Each method takes care of providing the Rover a "Navigatable terrain Image", "Obstacles Ahead", and "Samples/special Rocks in view". The `def sample_thresh` takes lower and upper thresholds of the color yellow in RGB. The function requires that each pixel in the input image be above all three lower threshold values in RGB and below the three  upper threshold values in RGB.
 
-This function is called with different thresholds for each of the 3 different cases:
-1. Ground extraction. Lower RGB threshold (165,165,165) and upper RGB threshold (255,255,255)
-2. Obstacle extraction. Lower RGB threshold (1,1,1) and upper RGB threshold (150,150,150)
-3. (Yellow) Rock extraction.  Lower RGB threshold (130,100,0) and upper RGB threshold (200,200,70)
+Each function is called consistantly, each with a different use case:
+1. Navigatable extraction. Threshold of RGB > 160 does a nice job of identifying ground pixels only
+```python
+def navigate_thresh(img, rgb_thresh=(160, 160, 160)):
+    # Create an array of zeros same xy size as img, but single channel
+    navigate_select = np.zeros_like(img[:,:,0])
+    # Require that each pixel be above all three threshold values in RGB
+    # above_thresh will now contain a boolean array with "True"
+    # where threshold was met
+    above_thresh = (img[:,:,0] > rgb_thresh[0]) \
+                & (img[:,:,1] > rgb_thresh[1]) \
+                & (img[:,:,2] > rgb_thresh[2])
+    # Index the array of zeros with the boolean array and set to 1
+    navigate_select[above_thresh] = 1
+    # Return the binary image
+    return navigate_select
+```
 
-An example of Ground extraction (left) and Obstacle extraction (right):
+2. Obstacle extraction.Threshold of RGB < 160 does a nice job of identifying obstacle pixels only
+```python
+def obstacle_thresh(img,rgb_thresh=(160,160,160)):
+    obstacle_select = np.zeros_like(img[:,:,0])
+    # Require that each pixel be above all three threshold values in RGB
+    # above_thresh will now contain a boolean array with "True"
+    # where threshold was met
+    below_thresh = (img[:,:,0] < rgb_thresh[0]) \
+                & (img[:,:,1] < rgb_thresh[1]) \
+                & (img[:,:,2] < rgb_thresh[2])
+    # Index the array of zeros with the boolean array and set to 1
+    obstacle_select[below_thresh] = 1
+    # Return the binary image
+    return obstacle_select
+```
+3. (Yellow) Sample/Rock extraction.  Lower RGB threshold (100, 100, 0) and upper RGB threshold (210, 210, 55)
+```python 
+def sample_thresh(img, low_yellow_thresh=(100, 100, 0), hi_yellow_thresh=(210, 210, 55)):
+    
+    # Create an array of zeros same xy size as img, but single channel
+    sample_select = np.zeros_like(img[:,:,0])
+    
+    # Threshold the image to get only yellow colors
+    sample_mask = cv2.inRange(img, low_yellow_thresh, hi_yellow_thresh)
+    
+    # Index the array of zeros with the boolean array and set to 1
+    sample_select[sample_mask] = 1
+    # Return the binary image
+    return sample_mask
+```
+
+Below are examples of Navigatable terrain extraction (left) and Obstacle extraction (right):
 
 ![alt text][image2a] ![alt text][image2b]
 
