@@ -20,11 +20,11 @@
 [//]: # "Image References"
 
 [image1a]: ./output/grid.PNG
-[image1b]: ./output/warpedGrid.png
-[image2a]: ./output/navigableExtract.png
-[image2b]: ./output/obstacleExtract.png
-[image3]: ./output/resultMapping.png
-[video1]: ./output/test_mapping.mp4
+[image1b]: ./output/warpedGrid.PNG
+[image2a]: ./output/navigableExtract.PNG
+[image2b]: ./output/obstacleExtract.PNG
+[image3]: ./output/resultMapping.PNG
+[video1]: ./output/test_mapping.MP4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
