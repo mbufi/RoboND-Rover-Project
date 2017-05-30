@@ -38,15 +38,33 @@
 
 In the simulator you can toggle on a grid on the ground for calibration. This is useful for selecting four points in your "source" image and map them to four points in our "destination" image, which will be the top-down view.The grid squares on the ground in the simulator represent 1 meter square each so this mapping will also provide us with a distance estimate to everything in the ground plane in the field of view.
 
+
+
 `perspect_transform(img, src, dst):` was defined that takes in the grid image, src points and desination points. Perspective transforms involve some complicated geometry, so the following OpenCV functions were used `cv2.getPerspectiveTransform()` and `cv2.warpPerspective()`, to aid in that process and do the calculations. The `perspect_transform(img, src, dst):` performs the Perspective Transform in the following 4 steps:
 1. Define 4 source points, in this case, the 4 corners of a grid cell in the image above.
 2. Define 4 destination points (must be listed in the same order as source points!).
-3. Use cv2.getPerspectiveTransform() to get M, the transform matrix.
-4. Use cv2.warpPerspective() to apply M and warp your image to a top-down view.
+3. Use `cv2.getPerspectiveTransform()` to get M, the transform matrix.
+4. Use `cv2.warpPerspective()` to apply M and warp your image to a top-down view.
 
 A tricky part to this is choosing the desintation points. In this case, it makes sense to choose a square set of points so that square meters in the grid are represented by square areas in the destination image. Mapping a one-square-meter grid cell in the image to a square that is 10x10 pixels, for example, implies a mapping of each pixel in the destination image to a 0.1x0.1 meter square on the ground.
 
-
+```python
+# Define calibration box in source (actual) and destination (desired) coordinates
+# These source and destination points are defined to warp the image
+# to a grid where each 10x10 pixel square represents 1 square meter
+# The destination box will be 2*dst_size on each side
+dst_size = 5 
+# Set a bottom offset to account for the fact that the bottom of the image 
+# is not the position of the rover but a bit in front of it
+# this is just a rough guess, feel free to change it!
+bottom_offset = 6
+source = np.float32([[14, 140], [301 ,140],[200, 96], [118, 96]])
+destination = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_offset],
+                  [image.shape[1]/2 + dst_size, image.shape[0] - bottom_offset],
+                  [image.shape[1]/2 + dst_size, image.shape[0] - 2*dst_size - bottom_offset], 
+                  [image.shape[1]/2 - dst_size, image.shape[0] - 2*dst_size - bottom_offset],
+                  ])
+```
 
 Below is an example of a camera image with grid added (to the left) and this same image with perspective transform applied to it (right). In the image below, the grid cells on the ground have been mapped to pixel squares, or in other words, each pixel in this image now represents 10 cm squared in the rover environment. The result looks a bit strange, but it is now a top-down view of the world that is visible in the rover camera's field of view. Basically a map for the rover.
 
