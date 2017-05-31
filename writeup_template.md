@@ -263,8 +263,7 @@ map_add = cv2.addWeighted(data.worldmap, 1, data.ground_truth, 0.5, 0)
 output_image[img.shape[0]:, 0:data.worldmap.shape[1]] = np.flipud(map_add)
 ```
 ##### A quick nagivation and mapping video using the functionality from the above code.
-
-![alt text][video1]
+can be found in the output folder.
 
 ### Autonomous Navigation and Mapping : NASA Rover Challenge
 
