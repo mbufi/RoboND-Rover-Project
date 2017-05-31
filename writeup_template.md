@@ -264,21 +264,141 @@ output_image[img.shape[0]:, 0:data.worldmap.shape[1]] = np.flipud(map_add)
 ##### A quick nagivation and mapping video using the functionality from the above code.
 can be found in the output folder.
 
-### Autonomous Navigation and Mapping : NASA Rover Challenge
+## Autonomous Navigation and Mapping : NASA Rover Challenge
 
-#### Requirements for a Passing Project Submission
+### Requirements for a Passing Project Submission
 The requirement for a passing submission is to map at least 40% of the environment at 60% fidelity and locate at least one of the rock samples. Each time you launch the simulator in autonomous mode there will be 6 rock samples scattered randomly about the environment and your rover will start at random orientation in the middle of the map.
 
-#### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
+### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
 With regards to `perception_step()`, almost all of the explaination on how these steps were coded is provided above. 
-With regards to `decision_step()`,
+With regards to `decision_step()`: The goal was to navigate around the map, pick up as many rocks/samples as possible and try not to get stuck.
+```python
+# This is where you can build a decision tree for determining throttle, brake and steer 
+# commands based on the output of the perception_step() function
+def decision_step(Rover):
+
+    # Implement conditionals to decide what to do given perception data
+    # Here you're all set up with some basic functionality but you'll need to
+    # improve on this decision tree to do a good job of navigating autonomously!
+
+    # Example:
+    # Check if we have vision data to make decisions with
+    if Rover.nav_angles is not None:
+        # Check for Rover.mode status
+
+        if Rover.mode == 'pickup':
+            #if you see samples ahead
+            if len(Rover.sample_angles) > 0:
+                if Rover.near_sample and not Rover.picking_up:
+                    Rover.brake = 2
+                    Rover.throttle = 0
+                    Rover.mode = 'stop'
+                    Rover.send_pickup = True
+                else:
+                    Rover.steer = np.clip(np.mean(Rover.sample_angles * 180 / np.pi), -15, 15)
+                    # low speed mode
+                    #if not slow, slow down
+                    if Rover.vel > (Rover.max_vel / 2):
+                        Rover.throttle = 0
+                        Rover.brake = 1
+                    else:
+                        #inch your way there making sure you are not above vel.
+                        Rover.throttle = Rover.throttle_set
+                        Rover.brake = 0
+
+            #you just pick up the sample and are in a bad position against the wall
+            else:
+                Rover.mode = 'forward'
+                
+        
+        elif Rover.mode == 'forward':
+             # Check if there is rock in front of rover
+            if len(Rover.sample_angles) > 0:
+                Rover.steer = np.clip(np.mean(Rover.sample_angles * 180 / np.pi), -15, 15)
+                Rover.mode = 'pickup'
+            
+            # Check the extent of navigable terrain
+            elif len(Rover.nav_angles) >= Rover.stop_forward:  
+                # If mode is forward, navigable terrain looks good 
+                # and velocity is below max, then throttle 
+                if Rover.vel < Rover.max_vel:
+                    # Set a larger throttle value at begginging
+                    if Rover.vel < 0.5 and Rover.mode == 'forward':
+                        Rover.throttle = Rover.throttle_set *5
+                    # Set throttle value to throttle setting
+                    else:
+                        Rover.throttle = Rover.throttle_set
+                else: # Else coast
+                    Rover.throttle = 0
+                    
+                Rover.brake = 0
+                # Set steering to average angle clipped to the range +/- 15
+                #run along the left side by adding a bias to the mean by 10
+                #Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi) + 10, -15, 15)
+                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
+            # If there's a lack of navigable terrain pixels then go to 'stop' mode
+            elif len(Rover.nav_angles) < Rover.stop_forward:
+                    # Set mode to "stop" and hit the brakes!
+                    Rover.throttle = 0
+                    # Set brake to stored brake value
+                    Rover.brake = Rover.brake_set
+                    Rover.steer = 0
+                    Rover.mode = 'stop'
+        
+            
+        
+        # If we're already in "stop" mode then make different decisions
+        elif Rover.mode == 'stop':
+            # If we're in stop mode but still moving keep braking
+            if len(Rover.sample_angles) > 0:
+                Rover.steer = np.clip(np.mean(Rover.sample_angles * 180 / np.pi), -15, 15)
+                Rover.mode = 'pickup'
+
+            if Rover.vel > 0.2:
+                Rover.throttle = 0
+                Rover.brake = Rover.brake_set
+                Rover.steer = 0
+            # If we're not moving (vel < 0.2) then do something else
+            elif Rover.vel <= 0.2:
+                # Now we're stopped and we have vision data to see if there's a path forward
+                if len(Rover.nav_angles) < Rover.go_forward:
+                    Rover.throttle = 0
+                    # Release the brake to allow turning
+                    Rover.brake = 0
+                    # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
+                    Rover.steer = -15 # Could be more clever here about which way to turn
+                # If we're stopped but see sufficient navigable terrain in front then go!
+                if len(Rover.nav_angles) >= Rover.go_forward:
+                    # Set throttle back to stored value
+                    Rover.throttle = Rover.throttle_set
+                    # Release the brake
+                    Rover.brake = 0
+                    # Set steer to mean angle
+                    Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
+                    Rover.mode = 'forward'
+
+                    
+    # Just to make the rover do something 
+    # even if no modifications have been made to the code
+    else:
+        Rover.throttle = Rover.throttle_set
+        Rover.steer = 0
+        Rover.brake = 0
+        
+    # If in a state where want to pickup a rock send pickup command
+    if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
+        Rover.send_pickup = True
+    
+    return Rover
+```
+
 
 
 Something to Note:
-The most important aspect was Optimizing Map Fidelity for the first run. Never did it meet the fidelity specifications until I included the max pitch/roll calculations. Without these, the fidelity was usually around 40%. Not a good accuracy! 
+The most important aspect was Optimizing Map Fidelity for the first run. Never did it meet the fidelity specifications until I included the max pitch/roll calculations. Without these, the fidelity was usually around 40%. Not a good accuracy! After the changes to MAX pitch/roll, the perception method disgarded any perspectives that had any distortions, improving accuracy over 30%!
 
 
-#### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
+### 2. Launching in autonomous mode your rover can navigate and map autonomously.
 
 The robot is capable of mapping more than 40% of the terrain at more than 60% fidelity. Sometimes the fidelity starts out below 60% but then it quickly goes up above 60%. As you can see, it mapped and grabbed 3 samples in over >50%  of the map at over > 70% fidelity.
 ![alt text][image5] 
