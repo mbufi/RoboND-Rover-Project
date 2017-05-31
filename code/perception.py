@@ -37,15 +37,12 @@ def obstacle_thresh(img,rgb_thresh=(160,160,160)):
 def sample_thresh(img):
     
     # Create an array of zeros same xy size as img, but single channel
-    low_yellow = np.array([20, 100, 100], dtype = "uint8")
-    high_yellow = np.array([255, 255, 255], dtype = "uint8")
-    
-    # Threshold the image to get only yellow colors
-    img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV,3)
-    
-    mask_sample = cv2.inRange(img_hsv, low_yellow, high_yellow)
+    low_yellow = np.array([100, 100, 0], dtype = "uint8")
+    high_yellow = np.array([190, 190, 50], dtype = "uint8")
+
+    sample_select = cv2.inRange(img, low_yellow, high_yellow)
     # Return the binary image
-    return mask_sample
+    return sample_select
 
 # Define a function to convert to rover-centric coordinates
 def rover_coords(binary_img):
@@ -158,15 +155,16 @@ def perception_step(Rover):
     x_NavPixel, y_NavPixel  = rover_coords(navigable)
 	
     # 6) Convert rover-centric pixel values to world coordinates
-    scale = 10 # 0.1 to 1
+    scale = 10
     world_size = Rover.worldmap.shape[0]
+    xpos, ypos = Rover.pos
 
-    obstacle_x_world, obstacle_y_world = pix_to_world(x_ObsPixel, y_ObsPixel, Rover.pos[0], Rover.pos[1], 
-                                    Rover.yaw, world_size, scale)
-    sample_x_world, sample_y_world = pix_to_world(x_SamplePixel, y_SamplePixel, Rover.pos[0], Rover.pos[1], 
-                                    Rover.yaw, world_size, scale)
-    nav_x_world, nav_y_world = pix_to_world(x_NavPixel, y_NavPixel, Rover.pos[0], Rover.pos[1], 
-                                    Rover.yaw, world_size, scale)
+    obstacle_x_world, obstacle_y_world = pix_to_world(x_ObsPixel, y_ObsPixel, xpos, ypos,
+                                                      Rover.yaw, world_size, scale)
+    sample_x_world, sample_y_world = pix_to_world(x_SamplePixel, y_SamplePixel, xpos, ypos,
+                                              Rover.yaw, world_size, scale)
+    navigable_x_world, navigable_y_world = pix_to_world(x_NavPixel, y_NavPixel, xpos, ypos,
+                                                        Rover.yaw, world_size, scale)
     
     
     # 7) Update Rover worldmap (to be displayed on right side of screen)
@@ -177,7 +175,7 @@ def perception_step(Rover):
     if(abs(pitch) < MAXPITCH and abs(roll) < MAXROLL):
         Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
         Rover.worldmap[sample_y_world, sample_x_world, 1] += 1
-        Rover.worldmap[nav_y_world, nav_x_world, 2] += 1
+        Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
     
     # 8) Convert rover-centric pixel positions to polar coordinates ( x/y to pixel coords)
 

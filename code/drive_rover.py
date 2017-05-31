@@ -49,30 +49,36 @@ class RoverState():
         self.steer = 0 # Current steering angle
         self.throttle = 0 # Current throttle value
         self.brake = 0 # Current brake value
+
         self.nav_angles = None # Angles of navigable terrain pixels
         self.nav_dists = None # Distances of navigable terrain pixels
-        self.sample_angles = None # Angles of navigable terrain pixels
-        self.sample_dists = None # Distances of navigable terrain pixels
+        self.sample_angles = None # Angles of samples pixels
+        self.sample_dists = None # Distances of sample pixels
+        
         self.ground_truth = ground_truth_3d # Ground truth worldmap
         self.mode = 'forward' # Current mode (can be forward or stop)
         self.throttle_set = 0.2 # Throttle setting when accelerating
         self.brake_set = 10 # Brake setting when braking
+
         # The stop_forward and go_forward fields below represent total count
         # of navigable terrain pixels.  This is a very crude form of knowing
         # when you can keep going and when you should stop.  Feel free to
         # get creative in adding new fields or modifying these!
-        self.stop_forward = 50 # Threshold to initiate stopping
+        self.stop_forward = 150 # Threshold to initiate stopping
         self.go_forward = 500 # Threshold to go forward again
         self.max_vel = 2 # Maximum velocity (meters/second)
+
         # Image output from perception step
         # Update this image to display your intermediate analysis steps
         # on screen in autonomous mode
         self.vision_image = np.zeros((160, 320, 3), dtype=np.float) 
+
         # Worldmap
         # Update this image with the positions of navigable terrain
         # obstacles and rock samples
         self.worldmap = np.zeros((200, 200, 3), dtype=np.float) 
         self.samples_pos = None # To store the actual sample positions
+        self.samples_to_find = 0 # To store the initial count of samples
         self.samples_found = 0 # To count the number of samples found
         self.near_sample = 0 # Will be set to telemetry value data["near_sample"]
         self.picking_up = 0 # Will be set to telemetry value data["picking_up"]
@@ -124,7 +130,12 @@ def telemetry(sid, data):
                 send_pickup()
                 # Reset Rover flags
                 Rover.send_pickup = False
+
+            if Rover.picking_up and not Rover.near_sample:
+                Rover.brake = 0
                 Rover.picking_up = False
+                Rover.mode = 'forward'
+                
         # In case of invalid telemetry, send null commands
         else:
 
@@ -166,7 +177,7 @@ def send_control(commands, image_string1, image_string2):
         "data",
         data,
         skip_sid=True)
-    #eventlet.sleep(0)
+    eventlet.sleep(0)
 # Define a function to send the "pickup" command 
 def send_pickup():
     print("Picking up")
@@ -187,7 +198,7 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     
-    os.system('rm -rf IMG_stream/*')
+    #os.system('rm -rf IMG_stream/*')
     if args.image_folder != '':
         print("Creating image folder at {}".format(args.image_folder))
         if not os.path.exists(args.image_folder):
