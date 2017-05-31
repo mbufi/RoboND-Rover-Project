@@ -109,20 +109,20 @@ def obstacle_thresh(img,rgb_thresh=(160,160,160)):
     # Return the binary image
     return obstacle_select
 ```
-3. (Yellow) Sample/Rock extraction.  Lower RGB threshold (100, 100, 0) and upper RGB threshold (210, 210, 55)
+3. (Yellow) Sample/Rock extraction.  Lower RGB threshold (20, 100, 100) and upper RGB threshold (255, 255, 255)
 ```python 
-def sample_thresh(img, low_yellow_thresh=(100, 100, 0), hi_yellow_thresh=(210, 210, 55)):
+def sample_thresh(img):
     
     # Create an array of zeros same xy size as img, but single channel
-    sample_select = np.zeros_like(img[:,:,0])
+    low_yellow = np.array([20, 100, 100], dtype = "uint8")
+    high_yellow = np.array([255, 255, 255], dtype = "uint8")
     
     # Threshold the image to get only yellow colors
-    sample_mask = cv2.inRange(img, low_yellow_thresh, hi_yellow_thresh)
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV,3)
     
-    # Index the array of zeros with the boolean array and set to 1
-    sample_select[sample_mask] = 1
+    mask_sample = cv2.inRange(img_hsv, low_yellow, high_yellow)
     # Return the binary image
-    return sample_mask
+    return mask_sample
 ```
 
 Below are examples of Navigatable terrain extraction (left) and sample extraction (right):
