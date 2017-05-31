@@ -125,7 +125,7 @@ def sample_thresh(img, low_yellow_thresh=(100, 100, 0), hi_yellow_thresh=(210, 2
     return sample_mask
 ```
 
-Below are examples of Navigatable terrain extraction (left) and Obstacle extraction (right):
+Below are examples of Navigatable terrain extraction (left) and sample extraction (right):
 
 ![alt text][image2a]
 
