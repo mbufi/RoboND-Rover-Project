@@ -244,8 +244,7 @@ map_add = cv2.addWeighted(data.worldmap, 1, data.ground_truth, 0.5, 0)
     # Flip map overlay so y-axis points upward and add to output_image 
 output_image[img.shape[0]:, 0:data.worldmap.shape[1]] = np.flipud(map_add)
 ```
-#### A quick nagivation and mapping video using the functionality from the above code.
-can be found in the output folder.
+#### A quick nagivation and mapping video using the functionality from the above code can be found in the output folder.
 
 ## Autonomous Navigation and Mapping : NASA Rover Challenge
 
