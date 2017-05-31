@@ -284,7 +284,7 @@ The most important aspect was Optimizing Map Fidelity for the first run. Never d
 The robot is capable of mapping more than 40% of the terrain at more than 60% fidelity. Sometimes the fidelity starts out below 60% but then it quickly goes up above 60%. As you can see, it mapped 2 samples in 59% of the map at over 70% fidelity.
 ![alt text][image5] 
 
-A demo video can be found [YouTube](https://)
+A demo video can be found [YouTube](https://youtu.be/INhpsn3H4ww)
 
 In addition it happens that the Rover gets stuck for a short while (a few seconds) when rotating away from certain obstacles. Despite this it manages to get loose and continue its exploration.
 
