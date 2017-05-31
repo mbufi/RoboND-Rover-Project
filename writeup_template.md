@@ -21,9 +21,8 @@
 
 [image1a]: ./output/grid.PNG
 [image1b]: ./output/warpedGrid.PNG
-[image2a]: ./output/navigableExtract.PNG
-[image2b]: ./output/ObstacleExtract.PNG
-[image3]: ./output/resultMapping.PNG
+[image2a]: ./output/colorExtract.PNG
+[image3]: ./output/completedThresh.PNG
 [image4a]: ./output/MaptoWorld.PNG
 [image4b]: ./output/rotationAndTranslation.PNG
 [image4c]: ./output/rotationMatrix.PNG
@@ -128,7 +127,7 @@ def sample_thresh(img, low_yellow_thresh=(100, 100, 0), hi_yellow_thresh=(210, 2
 
 Below are examples of Navigatable terrain extraction (left) and Obstacle extraction (right):
 
-![alt text][image2a] ![alt text][image2b]
+![alt text][image2a]
 
 ##### Coordinate Transformations
 ![alt text][image4a]
