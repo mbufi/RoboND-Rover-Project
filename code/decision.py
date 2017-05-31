@@ -68,4 +68,3 @@ def decision_step(Rover):
         Rover.brake = 0
 
     return Rover
-

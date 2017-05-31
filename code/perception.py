@@ -33,20 +33,19 @@ def obstacle_thresh(img,rgb_thresh=(160,160,160)):
     # Return the binary image
     return obstacle_select
 
-#identify samples with r>110 g>110 and b<100
-def sample_thresh(img, low_yellow_thresh=(100, 100, 0), hi_yellow_thresh=(210, 210, 55)):
+
+def sample_thresh(img):
     
     # Create an array of zeros same xy size as img, but single channel
-    sample_select = np.zeros_like(img[:,:,0])
+    low_yellow = np.array([20, 100, 100], dtype = "uint8")
+    high_yellow = np.array([255, 255, 255], dtype = "uint8")
     
     # Threshold the image to get only yellow colors
-    sample_mask = cv2.inRange(img, low_yellow_thresh, hi_yellow_thresh)
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV,3)
     
-    # Index the array of zeros with the boolean array and set to 1
-    sample_select[sample_mask] = 1
+    mask_sample = cv2.inRange(img_hsv, low_yellow, high_yellow)
     # Return the binary image
-    return sample_select
-    
+    return mask_sample
 
 # Define a function to convert to rover-centric coordinates
 def rover_coords(binary_img):
@@ -114,6 +113,81 @@ def perspect_transform(img, src, dst):
 
 # Apply the above functions in succession and update the Rover state accordingly
 def perception_step(Rover):
+    # Perform perception steps to update Rover()
+    # TODO: 
+    # NOTE: camera image is coming to you in Rover.img
+    MAXPITCH = .4 #from basepoint 0
+    MAXROLL = .4 # from basepoint 0
+
+    #get the minimum of both 
+    pitch = min(abs(Rover.pitch), abs(Rover.pitch -360))
+    roll = min(abs(Rover.roll), abs(Rover.roll -360))
     
-        
+    #we dont want to update if the pitch isnt good.
+    image = Rover.img
+
+    # 1) Define source and destination points for perspective transform
+    
+    dst_size = 5
+    bottom_offset = 6
+    source = np.float32([[14, 140], [301 ,140],[200, 96], [118, 96]])
+    destination = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_offset],
+                      [image.shape[1]/2 + dst_size, image.shape[0] - bottom_offset],
+                      [image.shape[1]/2 + dst_size, image.shape[0] - 2*dst_size - bottom_offset], 
+                      [image.shape[1]/2 - dst_size, image.shape[0] - 2*dst_size - bottom_offset],
+                      ])
+    # 2) Apply perspective transform
+    warped = perspect_transform(Rover.img, source, destination)
+    
+	# 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
+    # colorsel = color_thresh(persp_transf, rgb_thresh=(160, 160, 160))
+    navigable = navigate_thresh(warped) #navigable terrain color-thresholded binary image
+    obstacles = obstacle_thresh(warped) # obstacle color-thresholded binary image
+    samples = sample_thresh(warped) #rock_sample color-thresholded binary image 
+
+    # 4) Update Rover.vision_image (this will be displayed on left side of screen)
+
+    Rover.vision_image[:,:,0] = obstacles * 255
+    Rover.vision_image[:,:,1] = samples * 255
+    Rover.vision_image[:,:,2] = navigable * 255
+
+    
+    # 5) Convert map image pixel values to rover-centric coords
+    x_ObsPixel, y_ObsPixel  = rover_coords(obstacles)
+    x_SamplePixel, y_SamplePixel  = rover_coords(samples)
+    x_NavPixel, y_NavPixel  = rover_coords(navigable)
+	
+    # 6) Convert rover-centric pixel values to world coordinates
+    scale = 10 # 0.1 to 1
+    world_size = Rover.worldmap.shape[0]
+
+    obstacle_x_world, obstacle_y_world = pix_to_world(x_ObsPixel, y_ObsPixel, Rover.pos[0], Rover.pos[1], 
+                                    Rover.yaw, world_size, scale)
+    sample_x_world, sample_y_world = pix_to_world(x_SamplePixel, y_SamplePixel, Rover.pos[0], Rover.pos[1], 
+                                    Rover.yaw, world_size, scale)
+    nav_x_world, nav_y_world = pix_to_world(x_NavPixel, y_NavPixel, Rover.pos[0], Rover.pos[1], 
+                                    Rover.yaw, world_size, scale)
+    
+    
+    # 7) Update Rover worldmap (to be displayed on right side of screen)
+
+    #we do not want to update map if the pitch and roll are too great else our prespective
+    #step wont be accurate
+    #if (Rover.roll < MAXROLL or Rover.roll > 360 - MAXROLL) and (Rover.pitch < MAXPITCH or Rover.pitch > 360 - MAXPITCH): 
+    if(abs(pitch) < MAXPITCH and abs(roll) < MAXROLL):
+        Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
+        Rover.worldmap[sample_y_world, sample_x_world, 1] += 1
+        Rover.worldmap[nav_y_world, nav_x_world, 2] += 1
+    
+    # 8) Convert rover-centric pixel positions to polar coordinates ( x/y to pixel coords)
+
+    # Update Rover pixel distances and angles
+    navigatable_distance, navigatable_angles = to_polar_coords(x_NavPixel, y_NavPixel)
+    Rover.nav_dists = navigatable_distance
+    Rover.nav_angles = navigatable_angles
+
+    sample_distance, sample_angles = to_polar_coords(x_SamplePixel, y_SamplePixel)
+    Rover.sample_dists = sample_distance
+    Rover.sample_angles = sample_angles
+    
     return Rover
