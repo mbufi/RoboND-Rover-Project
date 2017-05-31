@@ -215,8 +215,6 @@ MAXPITCH = .4 #from basepoint 0
 MAXROLL = .4 # from basepoint 0
 
 #get the minimum of both 
-pitch = min(abs(data.pitch[data.count]), abs(data.pitch[data.count] -360))
-roll = min(abs(data.roll[data.count]), abs(data.roll[data.count]))
 if(abs(pitch) < MAXPITCH and abs(roll) < MAXROLL):
     data.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
     data.worldmap[sample_y_world, sample_x_world, 1] += 1
