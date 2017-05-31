@@ -385,7 +385,7 @@ The most important aspect was Optimizing Map Fidelity for the first run. Never d
 The robot is capable of mapping more than 40% of the terrain at more than 60% fidelity. Sometimes the fidelity starts out below 60% but then it quickly goes up above 60%. As you can see, it mapped and grabbed 3 samples in over >50%  of the map at over > 70% fidelity.
 ![alt text][image5] 
 
-A demo video can be found [YouTube](https://youtu.be/INhpsn3H4ww)
+A demo video can be found [YouTube](https://youtu.be/Dxi4_tZwQpI)
 
 In addition it happens that the Rover gets stuck for a short while (a few seconds) when rotating away from certain obstacles. To counter this, the Rover is set throttle as much as it can until it can reach of speed of over 0.5 m/s. This rapid acceleration allows it to get loose and continue its exploration.
 
@@ -403,5 +403,5 @@ To improve the results, most of the enhancements would be towards `decision.py`:
 
 
 `FPS: 57`
-`SIMULATOR SETTINGS: 1024x768, GRAPHICS = FANTASTIC`
+`SIMULATOR SETTINGS: 1024x768, GRAPHICS = FANTASTIC,  VERSION: MOST UP TO DATE INSTALL`
 
