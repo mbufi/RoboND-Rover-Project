@@ -1,22 +1,5 @@
 # Project: Search and Sample Return
 
-
-**The goals / steps of this project are the following:**  
-
-**Training / Calibration**  
-
-* Download the simulator and take data in "Training Mode"
-* Test out the functions in the Jupyter Notebook provided
-* Add functions to detect obstacles and samples of interest (golden rocks)
-* Fill in the `process_image()` function with the appropriate image processing steps (perspective transform, color threshold etc.) to get from raw images to a map.  The `output_image` you create in this step should demonstrate that your mapping pipeline works.
-* Use `moviepy` to process the images in your saved dataset with the `process_image()` function.  Include the video you produce as part of your submission.
-
-**Autonomous Navigation / Mapping**
-
-* Fill in the `perception_step()` function within the `perception.py` script with the appropriate image processing functions to create a map and update `Rover()` data (similar to what you did with `process_image()` in the notebook). 
-* Fill in the `decision_step()` function within the `decision.py` script with conditional statements that take into consideration the outputs of the `perception_step()` in deciding how to issue throttle, brake and steering commands. 
-* Iterate on your perception and decision function until your rover does a reasonable (need to define metric) job of navigating and mapping.  
-
 [//]: # "Image References"
 
 [image1a]: ./output/grid.PNG
@@ -30,14 +13,14 @@
 [video1]: ./output/test_mapping.MP4
 
 
-## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+##### [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
+##### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
 ---
-### Training/Calibration (Notebook Analysis)
-#### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
+## Training/Calibration (Notebook Analysis)
+### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
 
-##### Perspective Transform
+#### Perspective Transform
 
 
 In the simulator you can toggle on a grid on the ground for calibration. This is useful for selecting four points in your "source" image and map them to four points in our "destination" image, which will be the top-down view.The grid squares on the ground in the simulator represent 1 meter square each so this mapping will also provide us with a distance estimate to everything in the ground plane in the field of view.
@@ -74,7 +57,7 @@ Below is an example of a camera image with grid added (to the left) and this sam
 
 ![alt text][image1a]  ![alt text][image1b]
 
-##### Color Thresholding
+#### Color Thresholding
 
 Once the prespective transform has been applied, the next step is to create 3 new functions called `def navigate_thresh(img, rgb_thresh=(160, 160, 160)):`, `def obstacle_thresh(img,rgb_thresh=(160,160,160)):`, and `def sample_thresh(img, low_yellow_thresh=(100, 100, 0), hi_yellow_thresh=(210, 210, 55)):`. These 3 are used to extract the features out of the incoming camera input from the Rover, and segement them into binary images looking for specific thresholds. Each method takes care of providing the Rover a "Navigatable terrain Image", "Obstacles Ahead", and "Samples/special Rocks in view". The `def sample_thresh` takes lower and upper thresholds of the color yellow in RGB. The function requires that each pixel in the input image be above all three lower threshold values in RGB and below the three  upper threshold values in RGB.
 
@@ -128,7 +111,7 @@ Below are examples of Navigatable terrain extraction (left) and sample extractio
 
 ![alt text][image2a]
 
-##### Coordinate Transformations
+#### Coordinate Transformations
 
 The goal of the Coordinate Transforms is to allow you to use the rover's position, orientation and camera image to map its environment and compare against this ground truth map.
 
@@ -136,7 +119,7 @@ The goal of the Coordinate Transforms is to allow you to use the rover's positio
 
 The environment you will be navigating with the rover in this project is roughly 200 x 200 meters and looks like the image above from a top-down view. The white areas represent the navigable terrain. You will be provided a copy of this map with the project at a resolution of 1 square meter per pixel (same as shown above). 
 
-###### Rotation and Translation
+#### Rotation and Translation
 ![alt text][image4b]
 
 For rotation, you accomplish this by applying a rotation matrix to the rover space pixel values (xpixel,ypixel). For a roation through an angle θ, use the following:
@@ -165,15 +148,15 @@ ypix_translated = np.int_(ypos + (ypix_rot / scale))
 ```
 Note: Scale is a factor of 10 between world space pixels and rover space pixels in this case.
 
-##### The Resulting Process
+#### The Resulting Process
 Once we calculate pixel values in rover-centric coords and distance/angle to all pixels, apply rotation and tranlation we are provided with the following 4 images below. Upper left is a camera image. Upper right is a perspective transform. Bottom left is a combined thresholded image. The blue area is the navigable ground and the red part are the obstacles. Bottom right is a coordinate transform with and arrow indicating direction of travel of the robot.
 
 ![alt text][image3]
 
 
-#### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
+### 2. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 
-##### 1. Define source and destination points for perspective transform
+#### 1. Define source and destination points for perspective transform
 
 ```python
 dst_size = 5 
@@ -186,12 +169,12 @@ destination = np.float32([[image.shape[1]/2 - dst_size, image.shape[0] - bottom_
                   ])
 ```
 
-##### 2. Apply perspective transform
+#### 2. Apply perspective transform
 ```python 
 warped = perspect_transform(img, source, destination)
 ```
 
-##### 3. Apply color threshold to identify navigable terrain/obstacles/rock samples
+#### 3. Apply color threshold to identify navigable terrain/obstacles/rock samples
 
 ```python
 navigable = navigate_thresh(warped) #navigable terrain color-thresholded binary image
@@ -199,7 +182,7 @@ obstacles = obstacle_thresh(warped) # obstacle color-thresholded binary image
 samples = sample_thresh(warped) #sample color-thresholded binary image
 ```
 
-##### 4. Convert thresholded image pixel values to rover-centric coords
+#### 4. Convert thresholded image pixel values to rover-centric coords
 
 ```python
 x_ObsPixel, y_ObsPixel  = rover_coords(obstacles)
@@ -207,7 +190,7 @@ x_SamplePixel, y_SamplePixel  = rover_coords(samples)
 x_NavPixel, y_NavPixel  = rover_coords(navigable)
 ```
 
-##### 5. Convert rover-centric pixel values to world coords
+#### 5. Convert rover-centric pixel values to world coords
 
 The coordinates in the rover frame of reference are now converted to world frame of reference using `pix_to_world()`.
 ```python
@@ -222,7 +205,7 @@ nav_x_world, nav_y_world = pix_to_world(x_NavPixel, y_NavPixel, data.xpos[data.c
                                      data.yaw[data.count], world_size, scale)
 ```
 
-##### 6. Update worldmap (to be displayed on right side of screen)
+#### 6. Update worldmap (to be displayed on right side of screen)
 
 Optimizing Map Fidelity is an interesting proces.: The perspective transform is technically only valid when `roll` and `pitch angles` are near zero. If the Rovwer is slamming on the brakes or turning hard, both the `pitch` and `roll` can depart significantly from zero, and the transformed image will no longer be a valid map. It will be skewed and the resulting fidelity of what the Rover "maps" vs. the "real world" map with not coincide. Therefore, setting thresholds near zero in roll and pitch to determine which transformed images are valid for mapping before actually mapping them results in much better fidelity.
 ```python
@@ -241,7 +224,7 @@ if(abs(pitch) < MAXPITCH and abs(roll) < MAXROLL):
 ```
 
 
-##### 7. Make a mosaic image
+#### 7. Make a mosaic image
 
 Creating a composite image for the video.
 ```python
@@ -261,7 +244,7 @@ map_add = cv2.addWeighted(data.worldmap, 1, data.ground_truth, 0.5, 0)
     # Flip map overlay so y-axis points upward and add to output_image 
 output_image[img.shape[0]:, 0:data.worldmap.shape[1]] = np.flipud(map_add)
 ```
-##### A quick nagivation and mapping video using the functionality from the above code.
+#### A quick nagivation and mapping video using the functionality from the above code.
 can be found in the output folder.
 
 ## Autonomous Navigation and Mapping : NASA Rover Challenge
