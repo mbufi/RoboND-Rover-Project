@@ -130,9 +130,10 @@ Below are examples of Navigatable terrain extraction (left) and sample extractio
 ![alt text][image2a]
 
 ##### Coordinate Transformations
-![alt text][image4a]
 
 The goal of the Coordinate Transforms is to allow you to use the rover's position, orientation and camera image to map its environment and compare against this ground truth map.
+
+![alt text][image4a]
 
 The environment you will be navigating with the rover in this project is roughly 200 x 200 meters and looks like the image above from a top-down view. The white areas represent the navigable terrain. You will be provided a copy of this map with the project at a resolution of 1 square meter per pixel (same as shown above). 
 
