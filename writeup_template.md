@@ -26,7 +26,9 @@
 [image4a]: ./output/MaptoWorld.PNG
 [image4b]: ./output/rotationAndTranslation.PNG
 [image4c]: ./output/rotationMatrix.PNG
+[image5]: ./output/completeAutoRun.PNG
 [video1]: ./output/test_mapping.MP4
+
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -279,7 +281,7 @@ The most important aspect was Optimizing Map Fidelity for the first run. Never d
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
-IMAGE OF RESULT
+![alt text][image5] 
 
 
 To improve the results, most of the enhancements would be towards `decision.py`:
@@ -295,6 +297,6 @@ To improve the results, most of the enhancements would be towards `decision.py`:
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
-`FPS: 50`
+`FPS: 24/35`
 `SIMULATOR SETTINGS: 1024x768, GRAPHICS = GOOD`
 
