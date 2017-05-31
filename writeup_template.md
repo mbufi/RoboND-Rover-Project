@@ -281,6 +281,8 @@ The most important aspect was Optimizing Map Fidelity for the first run. Never d
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
+As you can see, it mapped 2 samples in 59% of the map at over 70% fidelity.
+
 ![alt text][image5] 
 
 
