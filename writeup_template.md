@@ -111,20 +111,17 @@ def obstacle_thresh(img,rgb_thresh=(160,160,160)):
     # Return the binary image
     return obstacle_select
 ```
-3. (Yellow) Sample/Rock extraction.  Lower RGB threshold (20, 100, 100) and upper RGB threshold (255, 255, 255)
+3. (Yellow) Sample/Rock extraction.  Lower RGB threshold (100, 100, 0) and upper RGB threshold (190, 190, 50)
 ```python 
 def sample_thresh(img):
     
     # Create an array of zeros same xy size as img, but single channel
-    low_yellow = np.array([20, 100, 100], dtype = "uint8")
-    high_yellow = np.array([255, 255, 255], dtype = "uint8")
-    
-    # Threshold the image to get only yellow colors
-    img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV,3)
-    
-    mask_sample = cv2.inRange(img_hsv, low_yellow, high_yellow)
+    low_yellow = np.array([100, 100, 0], dtype = "uint8")
+    high_yellow = np.array([190, 190, 50], dtype = "uint8")
+
+    sample_select = cv2.inRange(img, low_yellow, high_yellow)
     # Return the binary image
-    return mask_sample
+    return sample_select
 ```
 
 Below are examples of Navigatable terrain extraction (left) and sample extraction (right):
@@ -273,7 +270,9 @@ can be found in the output folder.
 The requirement for a passing submission is to map at least 40% of the environment at 60% fidelity and locate at least one of the rock samples. Each time you launch the simulator in autonomous mode there will be 6 rock samples scattered randomly about the environment and your rover will start at random orientation in the middle of the map.
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
-Much of the explaination on how these steps were coded is provided above. 
+With regards to `perception_step()`, almost all of the explaination on how these steps were coded is provided above. 
+With regards to `decision_step()`,
+
 
 Something to Note:
 The most important aspect was Optimizing Map Fidelity for the first run. Never did it meet the fidelity specifications until I included the max pitch/roll calculations. Without these, the fidelity was usually around 40%. Not a good accuracy! 
@@ -281,32 +280,26 @@ The most important aspect was Optimizing Map Fidelity for the first run. Never d
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
-The robot is capable of mapping more than 40% of the terrain at more than 60% fidelity. Sometimes the fidelity starts out below 60% but then it quickly goes up above 60%. As you can see, it mapped 2 samples in 59% of the map at over 70% fidelity.
+The robot is capable of mapping more than 40% of the terrain at more than 60% fidelity. Sometimes the fidelity starts out below 60% but then it quickly goes up above 60%. As you can see, it mapped and grabbed 3 samples in over >50%  of the map at over > 70% fidelity.
 ![alt text][image5] 
 
 A demo video can be found [YouTube](https://youtu.be/INhpsn3H4ww)
 
-In addition it happens that the Rover gets stuck for a short while (a few seconds) when rotating away from certain obstacles. Despite this it manages to get loose and continue its exploration.
+In addition it happens that the Rover gets stuck for a short while (a few seconds) when rotating away from certain obstacles. To counter this, the Rover is set throttle as much as it can until it can reach of speed of over 0.5 m/s. This rapid acceleration allows it to get loose and continue its exploration.
 
-On very rare occasions the robot gets stuck in obstacles and is not able to continue its exploration path. In this case the addition of a 'reverse' driving functionality in the decision_step() function might be of use.
-
-In order to increase the percentage of mapped terrain, some sort of weighting of the pixels in the world map could be used. The pixels which correspond to mapped terrain could acquire a higher weight than non-mapped ones. Hence the exploration could be guided towards the pixels on the world map with lower weight.
-
-
+On very rare occasions where there are small random obstacles, the robot gets stuck in in awkward positions due to weird geometry of the environment/boulders and is not able to continue its exploration path. In this case the addition of a 'reverse' driving functionality in the decision_step() would be very useful.
 
 To improve the results, most of the enhancements would be towards `decision.py`:
 * Give the robot more brains as to increasing speeds in straight aways for longer periods without swaying
-* Stop from re-visting areas
+* Stop from re-visting areas. Have some sort of understanding of already "mapped coords".
 * Making the Rover a wall crawler (since most samples are near the walls). If I made it always hug the RIGHT wall, it would never revist the same area until it reached 100% completion
-* Implementing the grabbing mechanism. It worked in my test scripts, but the simulator used too much memory, and caused various issues with lag and freezing during the process of grabbing samples.
 * Implementing start/end position coordinates. So once the Rover has mapped and grabbed all the samples, it would return to its starting coordinates using a somewhat complex planned navigation routine.  
 
 
 
 **Note: running the simulator with different choices of resolution and graphics quality may produce different results, particularly on different machines! Make a note of your simulator settings (resolution and graphics quality set on launch) and frames per second (FPS output to terminal by drive_rover.py) in your writeup when you submit the project so your reviewer can reproduce your results.**
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
-`FPS: 24/35`
-`SIMULATOR SETTINGS: 1024x768, GRAPHICS = GOOD`
+`FPS: 57`
+`SIMULATOR SETTINGS: 1024x768, GRAPHICS = FANTASTIC`
 
