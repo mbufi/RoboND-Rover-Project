@@ -139,8 +139,8 @@ def perception_step(Rover):
     # 2) Apply perspective transform
     warped = perspect_transform(Rover.img, source, destination)
     
-	# 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
-    # colorsel = color_thresh(persp_transf, rgb_thresh=(160, 160, 160))
+    # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
+    
     navigable = navigate_thresh(warped) #navigable terrain color-thresholded binary image
     obstacles = obstacle_thresh(warped) # obstacle color-thresholded binary image
     samples = sample_thresh(warped) #rock_sample color-thresholded binary image 
@@ -173,7 +173,7 @@ def perception_step(Rover):
 
     #we do not want to update map if the pitch and roll are too great else our prespective
     #step wont be accurate
-    #if (Rover.roll < MAXROLL or Rover.roll > 360 - MAXROLL) and (Rover.pitch < MAXPITCH or Rover.pitch > 360 - MAXPITCH): 
+     
     if(abs(pitch) < MAXPITCH and abs(roll) < MAXROLL):
         Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
         Rover.worldmap[sample_y_world, sample_x_world, 1] += 1
