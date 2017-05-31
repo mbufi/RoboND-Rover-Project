@@ -21,7 +21,7 @@
 
 [image1a]: ./output/grid.PNG
 [image1b]: ./output/warpedGrid.PNG
-[image2a]: ./output/colorExtract.PNG
+[image2a]: ./output/colorThresh.PNG
 [image3]: ./output/completedThresh.PNG
 [image4a]: ./output/MaptoWorld.PNG
 [image4b]: ./output/rotationAndTranslation.PNG
