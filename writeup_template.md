@@ -12,13 +12,7 @@
 [image5]: ./output/completeAutoRun.PNG
 [video1]: ./output/test_mapping.MP4
 
-
-##### [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
-##### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
-
----
 ## Training/Calibration (Notebook Analysis)
-### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
 
 #### Perspective Transform
 
@@ -253,7 +247,6 @@ output_image[img.shape[0]:, 0:data.worldmap.shape[1]] = np.flipud(map_add)
 ### Requirements for a Passing Project Submission
 The requirement for a passing submission is to map at least 40% of the environment at 60% fidelity and locate at least one of the rock samples. Each time you launch the simulator in autonomous mode there will be 6 rock samples scattered randomly about the environment and your rover will start at random orientation in the middle of the map.
 
-### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
 With regards to `perception_step()`, almost all of the explaination on how these steps were coded is provided above. 
 With regards to `decision_step()`: The goal was to navigate around the map, pick up as many rocks/samples as possible and try not to get stuck.
 ```python
